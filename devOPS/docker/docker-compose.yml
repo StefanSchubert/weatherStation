@@ -1,0 +1,25 @@
+# Wird nur für lokale Entwicklungszwecke während des Containerbaus benötigt
+version: '3.7'
+services:
+  weatherstation:
+    container_name: weather-station
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: accsonaut/weather-station:latest
+    user: "1000"
+    networks:
+      - weathernet
+    ports:
+      - "8080:8080"
+    volumes:
+      # For Docker Compose, we mount the directory into it, so we can run local development on the
+      # sources under assets for local development, while the runtime
+      # environment remains almost identical to production.
+      - ./assets/opt:/opt
+    environment:
+      - TomorrowIOapiKey=PLACE_YOUR_API_KEY_HERE
+
+networks:
+  weathernet:
+    driver: bridge

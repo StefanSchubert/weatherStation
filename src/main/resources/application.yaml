@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+api-keys:
+  # API Key of registered user to query Climate Cell Weather API
+  # Expected via environment. You can register for the free api plan via: tomorrow.io app
+  tomorrow-io: ${TomorrowIOapiKey}
+
+coordinates:
+  locations:
+    # Coords are in latitude and longitude
+    - name: Köln
+      coords: "50.9375,6.9603"
+    - name: Bonn
+      coords: "50.7374,7.0982"
+    - name: Aachen
+      coords: "50.7753,6.0839"
+    - name: Weilerswist
+      coords: "50.7803,6.8376"
+    - name: Darmstadt
+      coords: "49.8728,8.6512"
+    - name: Frankfurt
+      coords: "50.1109,8.6821"
+    - name: München
+      coords: "48.1351,11.5820"
+    - name: Cape Town
+      coords: "-33.9249,18.4241"
+    - name: Teneriffa
+      coords: "28.4682,-16.2546"
+    - name: Singapore
+      coords: "1.2896700,103.8500700"
+
+http:
+  timeout_in_secs: 30
+  # proxy:
+  #  host: ${https_proxy_host:""}
+  #  port: ${https_proxy_port:0}
+
+logging:
+  level:
+    de:
+      bluewhale: INFO
+    org:
+      springframework:
+        web: INFO
+

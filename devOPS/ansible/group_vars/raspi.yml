@@ -1,0 +1,4 @@
+# Common to your raspberrypi
+ansible_user: pi
+ansible_become: yes
+

@@ -1,0 +1,13 @@
+[Unit]
+Description=Weather Station App
+Documentation=https://github.com/StefanSchubert/weatherStation/Readme.md
+After=network-online.target
+
+[Service]
+User=weatherfrog
+Restart=on-failure
+
+ExecStart=/var/weatherStation/WeatherStation.jar
+
+[Install]
+WantedBy=multi-user.target

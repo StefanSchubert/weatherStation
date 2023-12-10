@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <!-- Taking care to have all spring dependencies right. -->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>de.bluewahle</groupId>
+    <artifactId>WeatherStation</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>WeatherStation</name>
+
+    <description>
+        Small SB application which provides a prometheus endpoint for configured
+        weather data. The origin of the data might be provided by different supplier.
+    </description>
+
+    <developers>
+        <developer>
+            <name>Stefan Schubert</name>
+            <email>stefan@bluewhale.de</email>
+            <roles>
+                <role>Software Engineer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <properties>
+        <spring.boot.version>3.1.5</spring.boot.version>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <log4j.version>2.20.0</log4j.version>
+        <lombok.version>1.18.30</lombok.version>
+        <micrometer.prometheus.version>1.11.4</micrometer.prometheus.version>
+        <caffeine.version>3.1.8</caffeine.version>
+
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <!-- favor log4j2 over logback -->
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- For Logging -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+
+        <!-- For Caching of Rest-Controller Responses -->
+        <dependency>
+            <!-- Spring Cache Abstraction -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Cache Implementation -->
+            <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
+        </dependency>
+
+
+        <!-- For logging and to spare Boilerplate Code -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+            <!-- Only required during build time-->
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <!--  Annotation preprocessing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <encoding>UTF-8</encoding>
+                    <annotationProcessorPaths>
+                        <!-- Process lombok annotations found in included libraries. -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <!--  Standard build configuration -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                            <Build-User>${user.name}</Build-User>
+                            <Build-OS>${os.name}</Build-OS>
+                            <Build-Label>${project.version}</Build-Label>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Build a fully executable jar -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies/>
+                <configuration>
+                    <!-- Build a fully executable jar to use it via /etc/init.d
+                      see https://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html
+                    -->
+                    <executable>true</executable>
+                    <!-- Tuning the required heap size / shrinked after analysing usage via grafana /
+                          revisit and readjust if necessary from time to time.
+
+                          Notice: This flag is being ignored by the plugin (Bug! 4/2019)
+                          As workaround/solution drop a YOURAPP.conf aside the YOURAPP.jar
+                          with the following content:
+                          export JAVA_OPTS="-Xmx128m -Xms64m"
+                    -->
+                    <jvmArguments>-Xmx128m</jvmArguments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- This will check for newer version on dependencies which are
+                      controlled by version property variables-->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <!--
+                            <goal>display-dependency-updates</goal>
+                            <goal>display-plugin-updates</goal>
+                            -->
+                            <goal>display-property-updates</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>

@@ -1,0 +1,77 @@
+- hosts: homepi
+  vars_files:
+    - ./group_vars/raspi.yml
+  tasks:
+    - name: Create weatherfrog user
+      user:
+        name: weatherfrog
+        create_home: false
+        shell: /usr/sbin/nologin
+        comment: "Weather Station Collector Service Account, no login possible."
+        expires: -1
+    - name: Adding existing user "weatherfrog" to group video for being able to use vcgencmd
+      user:
+        name: weatherfrog
+        groups: video
+        append: yes
+    - name: Create apps home directory
+      file:
+        path: /var/weatherStation
+        state: directory
+        owner: weatherfrog
+        group: weatherfrog
+        mode: 0775
+    - name: Copy new jar file
+      copy:
+        src: ../../target/WeatherStation.jar
+        dest: /var/weatherStation/WeatherStation.jar
+        owner: weatherfrog
+        group: weatherfrog
+        mode: '0500'
+    - name: Copy JVM config file
+      copy:
+        src: weatherStation-service.conf
+        dest: /var/weatherStation
+        owner: weatherfrog
+        group: weatherfrog
+        mode: '0444'
+    - name: ensure config dir exsists
+      file:
+        path: /var/weatherStation/config
+        state: directory
+        owner: weatherfrog
+        group: weatherfrog
+    - name: Drop old tmp folder
+      file:
+        state: absent
+        path: /var/weatherStation/tmp
+    - name: reCreate weatherStation own tmp directory
+      file:
+        path: /var/weatherStation/tmp
+        state: directory
+        owner: weatherfrog
+        group: weatherfrog
+    - name: reCreate sabis own log directory
+      file:
+        path: /var/weatherStation/logs
+        state: directory
+        owner: weatherfrog
+        group: weatherfrog
+    - name: Copy systemd service file to server
+      copy:
+        src: weatherStation.service
+        dest: /etc/systemd/system/weatherStation.service
+        owner: root
+        group: root
+    - name: enforce deamon config reload
+      command: systemctl daemon-reload
+    - name: Enable service weatherStation and ensure it is not masked
+      systemd:
+        name: weatherStation
+        enabled: yes
+        masked: no
+      async: 120
+    - name: Start weatherStation service
+      systemd:
+        name: weatherStation
+        state: restarted
