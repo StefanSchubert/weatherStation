@@ -56,7 +56,7 @@ public class PrometheusConverterService {
             if (responseTO != null) {
 
                 sb.append("#\n");
-                sb.append("# Data for "+location.getName());
+                sb.append("# Data for " + location.getName());
 
                 List<HourlyDataTO> hourlyDataList = responseTO.getTimelines().getHourly();
 
@@ -68,19 +68,18 @@ public class PrometheusConverterService {
                 if (latestHourlyData.isPresent()) {
                     HourlyDataTO dataTO = latestHourlyData.get();
 
-                    sb.append(" measured at "+dataTO.getTime());
+                    sb.append(" measured at " + dataTO.getTime());
                     sb.append("\n#\n");
 
                     ValuesTO values = dataTO.getValues();
-                    String locationName = location.getName();
 
-                    add2StringBufferIfNotNull(sb,"wind_speed",values.getWindSpeed(), locationName);
-                    add2StringBufferIfNotNull(sb,"wind_direction",values.getWindDirection(),locationName);
-                    add2StringBufferIfNotNull(sb,"rain_accumulation",values.getRainAccumulation(),locationName);
-                    add2StringBufferIfNotNull(sb,"temperature",values.getTemperature(),locationName);
-                    add2StringBufferIfNotNull(sb,"humidity",values.getHumidity(),locationName);
-                    add2StringBufferIfNotNull(sb,"pressureSurfaceLevel",values.getPressureSurfaceLevel(),locationName);
-                    add2StringBufferIfNotNull(sb,"uvindex",values.getUvIndex(),locationName);
+                    add2StringBufferIfNotNull(sb, "wind_speed", values.getWindSpeed(), location);
+                    add2StringBufferIfNotNull(sb, "wind_direction", values.getWindDirection(), location);
+                    add2StringBufferIfNotNull(sb, "rain_accumulation", values.getRainAccumulation(), location);
+                    add2StringBufferIfNotNull(sb, "temperature", values.getTemperature(), location);
+                    add2StringBufferIfNotNull(sb, "humidity", values.getHumidity(), location);
+                    add2StringBufferIfNotNull(sb, "pressureSurfaceLevel", values.getPressureSurfaceLevel(), location);
+                    add2StringBufferIfNotNull(sb, "uvindex", values.getUvIndex(), location);
                 } else {
                     sb.append("# No timeline retrieved");
                     sb.append("\n");
@@ -96,9 +95,15 @@ public class PrometheusConverterService {
 
     }
 
-    private void add2StringBufferIfNotNull(StringBuffer sb, String label, Double value, String locationName) {
+    private void add2StringBufferIfNotNull(StringBuffer sb, String label, Double value, LocationProperties.Location location) {
         if (value != null) {
-            String line = String.format(Locale.US,"%s{location=\"%s\"} %f\n", label, locationName, value);
+
+            String[] parts = location.getCoords().split(",");
+            String latitude = parts[0];
+            String longitude = parts[1];
+
+            String line = String.format(Locale.US, "%s{location=\"%s\",latitude=\"%s\",longitude=\"%s\"} %f\n",
+                    label, location.getName(), latitude, longitude, value);
             sb.append(line);
         }
     }
