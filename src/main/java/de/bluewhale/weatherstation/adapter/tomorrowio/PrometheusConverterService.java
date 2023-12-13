@@ -99,10 +99,10 @@ public class PrometheusConverterService {
         if (value != null) {
 
             String[] parts = location.getCoords().split(",");
-            String latitude = parts[0];
-            String longitude = parts[1];
+            Float latitude = Float.parseFloat(parts[0]);
+            Float longitude = Float.parseFloat(parts[1]);
 
-            String line = String.format(Locale.US, "%s{location=\"%s\",latitude=\"%s\",longitude=\"%s\"} %f\n",
+            String line = String.format(Locale.US, "%s{location=\"%s\",lat=%f,lon=%f} %f\n",
                     label, location.getName(), latitude, longitude, value);
             sb.append(line);
         }
