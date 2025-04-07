@@ -49,3 +49,5 @@ I use this to deploy the WeatherStation on a raspberry pi. You may adopt the con
 Copy the application.yml into /var/weatherstation/conf 
 Add you API-Key(s), favorite locations and restart the service.
 
+    sudo systemctl restart weatherStation
+

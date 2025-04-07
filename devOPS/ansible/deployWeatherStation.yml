@@ -9,11 +9,6 @@
         shell: /usr/sbin/nologin
         comment: "Weather Station Collector Service Account, no login possible."
         expires: -1
-    - name: Adding existing user "weatherfrog" to group video for being able to use vcgencmd
-      user:
-        name: weatherfrog
-        groups: video
-        append: yes
     - name: Create apps home directory
       file:
         path: /var/weatherStation
