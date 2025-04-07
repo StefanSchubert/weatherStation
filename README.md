@@ -37,7 +37,8 @@ I use this to deploy the WeatherStation on a raspberry pi. You may adopt the con
 
 * Ansible and ssh are available
 * The ssh private key of the executing user has been published onto the 'pi' account.
-* The pi has a java 21 JRE
+* The pi has a java 21 JRE, notice the Environment at your [Service]section in the 
+  weatherStation.service file as it should point to the java 21 JRE.
 
 #### Deployment of a new Weather Station release
 
