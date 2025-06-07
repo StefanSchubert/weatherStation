@@ -8,6 +8,7 @@ User=weatherfrog
 Restart=on-failure
 Environment="JAVA_HOME=/home/weatherfrog/.sdkman/candidates/java/current"
 Environment="PATH=/home/weatherfrog/.sdkman/candidates/java/current/bin:/usr/bin:/bin"
+WorkingDirectory=/var/weatherStation
 ExecStart=/var/weatherStation/WeatherStation.jar
 
 [Install]
