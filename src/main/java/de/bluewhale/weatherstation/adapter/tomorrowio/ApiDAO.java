@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @Slf4j
@@ -20,13 +22,22 @@ public class ApiDAO {
     @Value("${api-keys.tomorrow-io}")
     String apiKey;
 
+    private static final AtomicBoolean MISSING_API_KEY_WARNING_LOGGED = new AtomicBoolean(false);
+
     static HttpHeaders httpHeaders = null;
     final static String WEATHER_REQUEST_ENDPOINT = "https://api.tomorrow.io/v4/weather/forecast";
 
     public WeatherResponseTO fetchCurrentWeather(String locationCoords) {
 
+        if (!StringUtils.hasText(this.apiKey)) {
+            if (MISSING_API_KEY_WARNING_LOGGED.compareAndSet(false, true)) {
+                log.warn("No Tomorrow.io API key configured ('api-keys.tomorrow-io'). Skipping remote weather requests.");
+            }
+            return null;
+        }
+
         String endpointURL = WEATHER_REQUEST_ENDPOINT + "?location=\""+locationCoords+"\"&timesteps=1h&units=metric&apikey="+ this.apiKey;
-        log.info("Requesting {}",endpointURL);
+        log.info("Requesting forecast for {}", locationCoords);
         final HttpHeaders headers = buildHttpHeader();
         final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 

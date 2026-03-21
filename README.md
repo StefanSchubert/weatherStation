@@ -23,11 +23,14 @@ origin data supplier.
     pull accsonaut/weather-station:latest
     docker run -p 8080:8080 -e TomorrowIOapiKey=PLACE_YOU_API_KEY_HERE --name WaetherStation accsonaut/weather-station:latest
 
-point your browser to 
+point your browser to
 
     http://localhost:8080/metrics
 
 (response may need 5 secs)
+
+For local development you can also start without `TomorrowIOapiKey`.
+The service starts, but `/metrics` will only contain provider error lines until a valid key is configured.
 
 ### Ansible Deployment
 
@@ -37,8 +40,8 @@ I use this to deploy the WeatherStation on a raspberry pi. You may adopt the con
 
 * Ansible and ssh are available
 * The ssh private key of the executing user has been published onto the 'pi' account.
-* The pi has a java 21 JRE, notice the Environment at your [Service]section in the 
-  weatherStation.service file as it should point to the java 21 JRE.
+* The pi has a java 25 JRE, notice the Environment at your [Service]section in the
+  weatherStation.service file as it should point to the java 25 JRE.
 
 #### Deployment of a new Weather Station release
 

@@ -1,20 +1,18 @@
 package de.bluewhale.weatherstation.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 @Configuration
 @Slf4j
@@ -30,27 +28,28 @@ public class RestTemplateConfig {
     private Integer httpProxyPort;
 
     @Bean
-    public RestTemplate restTemplate(ObjectMapper objectMapper) {
+    public JsonMapper jsonMapper() {
+        return JsonMapper.builder().build();
+    }
 
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(objectMapper);
+    @Bean
+    public RestTemplate restTemplate(JsonMapper jsonMapper) {
 
-        RestTemplate restTemplate = new RestTemplateBuilder()
-                .additionalMessageConverters(converter)
-                .setConnectTimeout(Duration.of(http_timeout_in_secs, ChronoUnit.SECONDS))
-                .build();
+        final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        final Duration timeout = Duration.ofSeconds(http_timeout_in_secs);
+        requestFactory.setConnectTimeout(timeout);
+        requestFactory.setReadTimeout(timeout);
 
         if (httpProxyHost != null && httpProxyHost.length() > 4 && httpProxyPort != null) {
             log.info("Proxyconfiguration discovered, using {}:{}", httpProxyHost, httpProxyPort);
-            // Proxy inkludieren
-            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(httpProxyHost, httpProxyPort));
+            final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(httpProxyHost, httpProxyPort));
             requestFactory.setProxy(proxy);
-            restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(requestFactory));
         } else {
             log.info("No Proxyconf found, continue without it.");
-            restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(restTemplate.getRequestFactory()));
         }
+
+        final RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(requestFactory));
+        restTemplate.getMessageConverters().add(0, new JacksonJsonHttpMessageConverter(jsonMapper));
 
         return restTemplate;
     }

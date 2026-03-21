@@ -4,7 +4,8 @@ server:
 api-keys:
   # API Key of registered user to query Climate Cell Weather API
   # Expected via environment. You can register for the free api plan via: tomorrow.io app
-  tomorrow-io: ${TomorrowIOapiKey}
+  # Empty default allows local startup without key; metrics will contain provider error lines.
+  tomorrow-io: ${TomorrowIOapiKey:}
 
 coordinates:
   locations:
@@ -43,4 +44,3 @@ logging:
     org:
       springframework:
         web: INFO
-

@@ -1,7 +1,7 @@
 # Base container with amazon corretto
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:25-alpine
 
-# Copy sabis executable jar. You need to replace the jar from the assets dir after a new build
+# Copy Spring Boot jar. You need to replace the jar from the assets dir after a new build
 # copyjars.sh will do it for you
 COPY assets/ /
 
@@ -16,7 +16,7 @@ EXPOSE 8080
 
 WORKDIR /opt/WeatherStation
 
-# Start our app
+# Start app via JVM (no fully executable jar)
 USER 1000
-ENTRYPOINT ["/usr/bin/java", "-jar", "/opt/WeatherStation/WeatherStation.jar"]
+ENTRYPOINT ["java", "-jar", "/opt/WeatherStation/WeatherStation.jar"]
 
