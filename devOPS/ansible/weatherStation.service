@@ -6,11 +6,13 @@ After=network-online.target
 [Service]
 User=weatherfrog
 Restart=on-failure
-Environment="JAVA_HOME=/home/weatherfrog/.sdkman/candidates/java/current"
-Environment="PATH=/home/weatherfrog/.sdkman/candidates/java/current/bin:/usr/bin:/bin"
-EnvironmentFile=-/var/weatherStation/weatherStation-service.conf
 WorkingDirectory=/var/weatherStation
-ExecStart=/bin/java -jar /var/weatherStation/WeatherStation.jar
+ExecStart=/bin/java -jar /var/weatherStation/WeatherStation.jar \
+    -Djava.io.tmpdir=/var/weatherStation/tmp \
+    -XX:-UsePerfData \
+    -Xmx96m \
+    -Xms64m \
+    -XX:MaxMetaspaceSize=128m
 
 [Install]
 WantedBy=multi-user.target
