@@ -10,7 +10,7 @@ Environment="JAVA_HOME=/home/weatherfrog/.sdkman/candidates/java/current"
 Environment="PATH=/home/weatherfrog/.sdkman/candidates/java/current/bin:/usr/bin:/bin"
 EnvironmentFile=-/var/weatherStation/weatherStation-service.conf
 WorkingDirectory=/var/weatherStation
-ExecStart=/home/weatherfrog/.sdkman/candidates/java/current/bin/java -jar /var/weatherStation/WeatherStation.jar
+ExecStart=/bin/java -jar /var/weatherStation/WeatherStation.jar
 
 [Install]
 WantedBy=multi-user.target
